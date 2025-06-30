@@ -1,6 +1,6 @@
 let heroes = [];
 
-fetch('http://10.10.10.240:3000/api/heroes')
+fetch('http://peeranat.ddns.net:3000/api/heroes')
     .then(response => response.json())
     .then(data => {
         heroes = data;
@@ -8,7 +8,8 @@ fetch('http://10.10.10.240:3000/api/heroes')
     })
     .catch(err => console.error('Error loading heroes:', err));
 
-const socket = io('http://10.10.10.240:3000');
+const socket = io('http://peeranat.ddns.net:3000');
+
 let timer = 60;
 let interval;
 
