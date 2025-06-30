@@ -26,6 +26,7 @@ socket.on('initData', (data) => {
     displayHeroes(data.heroes);
     socket.emit('getSelectedHeroes');
 });
+
 // รับอัพเดต timer และ phase จาก server
 socket.on('timerUpdate', ({ timer, currentPhaseIndex }) => {
     document.getElementById('timer').textContent = timer;
@@ -36,6 +37,20 @@ socket.on('phaseUpdate', ({ phase, timer }) => {
     document.getElementById('arrow').src = phase.direction;
     document.getElementById('timer').textContent = timer;
 });
+
+socket.on('updateSelectedHeroes', ({ updatedHeroes }) => {
+  console.log('updateSelectedHeroes received:', updatedHeroes);
+  updatedHeroes.forEach(({ positionId, heroId }) => {
+    const hero = heroes.find(h => h.id === heroId);
+    if (hero) {
+      updateHeroImage(hero, positionId);
+      document.getElementById(`search-${positionId}`).value = hero.name;
+    } else {
+      console.warn(`Hero id ${heroId} not found in local heroes list`);
+    }
+  });
+});
+
 
 // สั่ง start timer
 document.getElementById('start').addEventListener('click', () => {
@@ -448,6 +463,7 @@ resetButton.addEventListener('click', reset);
 // เริ่มต้น phase แรก
 updateUI();
 
+//ฟังก์ชั่นสลับภาพ
 function swapHeroes(id1, id2) {
     const imageDisplay1 = document.getElementById(`image-display-${id1}`);
     const imageDisplay2 = document.getElementById(`image-display-${id2}`);
@@ -460,33 +476,57 @@ function swapHeroes(id1, id2) {
     // เช็คว่ามีภาพทั้งสองฝั่งไหม
     if (!img1 || !img2) return;
 
-    // ใส่ animation fly-out
-    img1.classList.add('fly-out');
-    img2.classList.add('fly-out');
+    // ส่งข้อมูลไปอัปเดตใน database ก่อน
+    fetch('http://peeranat.ddns.net:3000/api/swap-heroes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ positionId1: id1, positionId2: id2 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // ถ้า swap ใน database สำเร็จ ค่อยสลับในหน้าเว็บ
 
-    setTimeout(() => {
-        // สลับ src และ alt
-        const tempSrc = img1.src;
-        const tempAlt = img1.alt;
+            
 
-        img1.src = img2.src;
-        img1.alt = img2.alt;
+            // ใส่ animation fly-out
+            img1.classList.add('fly-out');
+            img2.classList.add('fly-out');
 
-        img2.src = tempSrc;
-        img2.alt = tempAlt;
+            setTimeout(() => {
+                // สลับ src และ alt
+                const tempSrc = img1.src;
+                const tempAlt = img1.alt;
 
-        // ใส่ fly-in
-        img1.classList.remove('fly-out');
-        img1.classList.add('fly-in');
+                img1.src = img2.src;
+                img1.alt = img2.alt;
 
-        img2.classList.remove('fly-out');
-        img2.classList.add('fly-in');
+                img2.src = tempSrc;
+                img2.alt = tempAlt;
 
-        // สลับชื่อใน input
-        const tempSearch = searchInput1.value;
-        searchInput1.value = searchInput2.value;
-        searchInput2.value = tempSearch;
+                // ใส่ fly-in
+                img1.classList.remove('fly-out');
+                img1.classList.add('fly-in');
 
-    }, 500); // ระยะเวลา fly-out
+                img2.classList.remove('fly-out');
+                img2.classList.add('fly-in');
+
+                // สลับชื่อใน input
+                const tempSearch = searchInput1.value;
+                searchInput1.value = searchInput2.value;
+                searchInput2.value = tempSearch;
+                
+                //ส่งไปยังเซร์ฟเวอร์
+        // socket.emit('selectHero', { heroId: hero.id, positionId: id });
+            }, 500); // ระยะเวลา fly-out
+        } else {
+            alert('เกิดข้อผิดพลาดในการสลับข้อมูลในฐานข้อมูล');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
+    });
 }
+
 
