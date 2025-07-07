@@ -116,39 +116,37 @@
 
     </div>
 
-<!-- Tour info -->
+<!-- Tour info  -->
 
     <div class="tournamentinfo">
-        <div class="tournamentlogo"> 
-            DAY 1 MATCH 1
-            <!-- <img class="logoprop" src="Assets/Other/logo.png"> -->
-        </div>
+        <div class="tournamentlogo" id="tournamentLogo">
+    DAY 1 MATCH 1
+    <!-- <img class="logoprop" src="Assets/Other/logo.png"> -->
+</div>
+
 
         <div class="phase" id="phase"></div>
 
         <div class="bluevsred">
 
             <div class="bluelogo">
-                <div class="image-container">
-                    <img id="image1" src="https://via.placeholder.com/300x200?text=Image+1" alt="Image 1" onclick="swapContent()">
-                </div>
+                <div style="text-align: center;">
+        <span id="blueTeam" style="font-size: 70px; color: white;">0</span><br>
+    </div>
             </div>
             
             <div class="vslogo">
-                
                 <div class="timer" id="timer">60</div>
-
                 <div class="direction" id="direction">
                 <img id="arrow" src="/Assets/Other/Adjustment.gif" alt="Arrow">
                 </div>
-              
-                
-
             </div>
             
             <div class="redlogo">
                 <div class="image-container">
-                    <img id="image2" src="https://via.placeholder.com/300x200?text=Image+2" alt="Image 2" onclick="swapContent()">
+                   <div style="text-align: center;">
+        <span id="redTeam" style="font-size: 70px; color: white;">0</span><br>
+    </div>
                 </div>
             </div>
             
@@ -353,7 +351,8 @@
     <button class="controlbutton" onclick="resetContent()">Reset</button>
     
   <!-- Input Box -->
-  <input type="text" id="tournamentnamemid" class="tournamentnamebox" placeholder="ไว้ใส่ข้อความด้านบน">
+  <input type="text" id="tournamentnamemid" class="tournamentnamebox" placeholder="ชื่อทัวร์นาเมนต์">
+<button onclick="updateTournamentName()">อัปเดตชื่อทัวร์นาเมนต์</button>
   
   <!-- Output Box -->
 
@@ -559,7 +558,11 @@
                 <label><input type="checkbox" id="checkbox3" onclick="toggleImage('extraImage3')" unchecked>3</label>
                 
             </div>
-
+            <div style="margin-top: 10px;">
+    <input type="number" id="blueScoreInput" placeholder="คะแนนฝั่งสีน้ำเงิน">
+    <input type="number" id="redScoreInput" placeholder="คะแนนฝั่งสีแดง">
+    <button onclick="submitScore()">อัปเดตคะแนน</button>
+</div>
             </div>
         </div>
         

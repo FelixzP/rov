@@ -10,21 +10,23 @@ fetch('http://peeranat.ddns.net:3000/api/heroes')
 
 const socket = io('http://peeranat.ddns.net:3000');
 
-let timer = 60;
+let timer = null;
 let interval;
+let tournamentId = null;
 
 socket.on('initData', (data) => {
     document.getElementById('phase').innerText = data.phase.type;
     document.getElementById('direction').src = data.phase.direction;
     timer = data.timer;
 
-    updateTimer();
+    document.getElementById('timer').innerText = timer; // ✅ ให้แสดง timer ที่ได้จาก server
 
-    if (interval) clearInterval(interval);
-    interval = setInterval(updateTimer, 1000);
+    // if (interval) clearInterval(interval);
+    // interval = setInterval(updateTimer, 1000);
 
     displayHeroes(data.heroes);
     socket.emit('getSelectedHeroes');
+    socket.emit('scoreUpdated');
 });
 
 // รับอัพเดต timer และ phase จาก server
@@ -32,11 +34,16 @@ socket.on('timerUpdate', ({ timer, currentPhaseIndex }) => {
     document.getElementById('timer').textContent = timer;
 });
 
-socket.on('phaseUpdate', ({ phase, timer }) => {
-    document.getElementById('phase').textContent = phase.type;
-    document.getElementById('arrow').src = phase.direction;
-    document.getElementById('timer').textContent = timer;
+
+socket.on('phaseUpdate', ({ phase, timer: serverTimer, currentPhaseIndex: serverPhaseIndex }) => {
+    currentPhaseIndex = serverPhaseIndex; // อัปเดต index ให้ client
+    timer = serverTimer;
+
+    updateUI();
 });
+
+
+
 
 socket.on('updateSelectedHeroes', ({ updatedHeroes }) => {
   console.log('updateSelectedHeroes received:', updatedHeroes);
@@ -54,12 +61,19 @@ socket.on('updateSelectedHeroes', ({ updatedHeroes }) => {
 
 // สั่ง start timer
 document.getElementById('start').addEventListener('click', () => {
+    console.log('Start button clicked');
     socket.emit('startTimer');
 });
 
-// สั่ง stop timer
+
+// ปุ่ม Stop
 document.getElementById('stop').addEventListener('click', () => {
-    socket.emit('stopTimer');
+    socket.emit('stopTimer');  // ส่ง event ไปที่ server ให้หยุด timer
+});
+
+// รับ event อัพเดต timer จาก server เพื่อแสดงผล
+socket.on('timerUpdate', ({ timer }) => {
+    document.getElementById('timer').innerText = timer;
 });
 
 // สั่ง reset timer + phase
@@ -88,16 +102,6 @@ socket.on('resetSelectedHeroes', () => {
     });
 });
 
-socket.on('phaseUpdate', (data) => {
-    document.getElementById('phase').innerText = data.phase.type;
-    document.getElementById('direction').src = data.phase.direction;
-    
-    timer = 60;
-
-    if (interval) clearInterval(interval);
-    interval = setInterval(updateTimer, 1000);
-});
-
 socket.on('heroSelected', (data) => {
     updateHeroImage(data.hero, data.positionId);
 });
@@ -111,14 +115,76 @@ socket.on('initSelectedHeroes', (heroes) => {
     });
 });
 
-function updateTimer() {
-    if (timer > 0) {
-        document.getElementById('timer').innerText = timer;
-        timer--;
-    } else {
-        clearInterval(interval);
-    }
+// function updateTimer() {
+//     if (timer > 0) {
+//         document.getElementById('timer').innerText = timer;
+//         timer--;
+//     } else {
+//         clearInterval(interval);
+//     }
+// }
+function submitScore() {
+    let blueScore = parseInt(document.getElementById('blueScoreInput').value);
+    let redScore = parseInt(document.getElementById('redScoreInput').value);
+
+    // ถ้า parseInt แล้วเป็น NaN ให้แทนด้วย 0
+    blueScore = isNaN(blueScore) ? 0 : blueScore;
+    redScore = isNaN(redScore) ? 0 : redScore;
+
+    fetch('http://peeranat.ddns.net:3000/api/update-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueScore, redScore })
+    }).then(() => {
+        console.log('Score submitted. Waiting for socket update...');
+        // ไม่ต้อง loadTournament() เพราะ server จะ emit scoreUpdate ให้อยู่แล้ว
+    });
 }
+
+
+
+
+
+function loadTournament() {
+    fetch('/api/get-tournament')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('tournamentnamemid').value = data.name;
+            document.getElementById('tournamentLogo').innerText = data.name;
+            document.getElementById('blueTeam').innerText = `(${data.blue_score ?? 0})`;
+document.getElementById('redTeam').innerText = `(${data.red_score ?? 0})`;
+            document.getElementById('blueScoreInput').value = data.blue_score;
+            document.getElementById('redScoreInput').value = data.red_score;
+        });
+}
+
+
+function updateTournamentName() {
+    const tournamentName = document.getElementById('tournamentnamemid').value;
+
+    fetch('/api/update-tournament-name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tournamentName })
+    });
+}
+
+
+
+socket.on('tournamentNameUpdated', ({ tournamentName }) => {
+    document.getElementById('tournamentLogo').innerText = tournamentName;
+    document.getElementById('tournamentnamemid').value = tournamentName; // อัปเดตใน input ด้วย
+});
+
+socket.on('scoreUpdate', ({ blueScore, redScore }) => {
+    document.getElementById('blueTeam').innerText = `${blueScore}`;
+    document.getElementById('redTeam').innerText = `${redScore}`;
+
+    // อัปเดต input ด้วย
+    document.getElementById('blueScoreInput').value = blueScore;
+    document.getElementById('redScoreInput').value = redScore;
+});
+
 
 function nextPhase() {
     socket.emit('nextPhase');
@@ -338,15 +404,14 @@ function switchAll() {
 }
 
     // Ambil elemen input dan output
-window.onload = function() {
-    const tournamentnameInput = document.getElementById('tournamentnamemid');
-    const tournamentnameOutput = document.getElementById('tournamentnameOutput');
+// window.onload = function() {
+//     const tournamentnameInput = document.getElementById('tournamentnamemid');
+//     const tournamentnameOutput = document.getElementById('tournamentnameOutput');
 
-    tournamentnameInput.addEventListener('input', function() {
-        tournamentnameOutput.textContent = tournamentnameInput.value;
-    });
-};
-//timer
+//     tournamentnameInput.addEventListener('input', function() {
+//         tournamentnameOutput.textContent = tournamentnameInput.value;
+//     });
+// };
 
 const phases = [
   // รอบแบน 1
@@ -405,52 +470,52 @@ function updateUI() {
 }
 
 // Start the timer
-function startTimer() {
-    if (!timerRunning) {
-        timerRunning = true;
-        timerInterval = setInterval(() => {
-            if (timer > 0) {
-                timer--;
-                timerElement.textContent = timer;
-            } else {
-                clearInterval(timerInterval); // Stop timer when it reaches 0
-                timerRunning = false; // Timer stops running
-                moveToNextPhase(); // Automatically move to the next phase
-            }
-        }, 1000);
-    }
-}
+// function startTimer() {
+//     if (!timerRunning) {
+//         timerRunning = true;
+//         timerInterval = setInterval(() => {
+//             if (timer > 0) {
+//                 timer--;
+//                 timerElement.textContent = timer;
+//             } else {
+//                 clearInterval(timerInterval); // Stop timer when it reaches 0
+//                 timerRunning = false; // Timer stops running
+//                 moveToNextPhase(); // Automatically move to the next phase
+//             }
+//         }, 1000);
+//     }
+// }
 
 // Stop the timer
-function stopTimer() {
-    clearInterval(timerInterval); // Stop the timer
-    timerRunning = false;
-}
+// function stopTimer() {
+//     clearInterval(timerInterval); // Stop the timer
+//     timerRunning = false;
+// }
 
 // Move to the next phase
-function moveToNextPhase() {
-    if (currentPhaseIndex < phases.length) {
-        currentPhaseIndex++;
-        updateUI();
-        if (currentPhaseIndex < phases.length) {
-            timer = 60; // Reset timer
-            startTimer(); // Restart timer
-        }
-    }
-}
+// function moveToNextPhase() {
+//     if (currentPhaseIndex < phases.length) {
+//         currentPhaseIndex++;
+//         updateUI();
+//         if (currentPhaseIndex < phases.length) {
+//             timer = 60; // Reset timer
+//             startTimer(); // Restart timer
+//         }
+//     }
+// }
 
 // Reset the entire process
 function reset() {
     clearInterval(timerInterval); // Stop the timer
-    currentPhaseIndex = 0; // Reset phase index
-    timer = 60; // Reset timer
+    // currentPhaseIndex = 0; // Reset phase index
+    // timer = 60; // Reset timer
     timerRunning = false;
-    updateUI(); // Reset UI
+    // updateUI(); // Reset UI
     socket.emit('reset');
 }
 
 // Button event listeners
-startButton.addEventListener('click', startTimer);
+
 stopButton.addEventListener('click', stopTimer);
 nextPhaseButton.addEventListener('click', () => {
     stopTimer();
@@ -461,7 +526,7 @@ resetButton.addEventListener('click', reset);
 
 
 // เริ่มต้น phase แรก
-updateUI();
+// updateUI();
 
 //ฟังก์ชั่นสลับภาพ
 function swapHeroes(id1, id2) {
