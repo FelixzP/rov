@@ -516,12 +516,12 @@ function reset() {
 
 // Button event listeners
 
-stopButton.addEventListener('click', stopTimer);
-nextPhaseButton.addEventListener('click', () => {
-    stopTimer();
-    moveToNextPhase();
-});
-resetButton.addEventListener('click', reset);
+// stopButton.addEventListener('click', stopTimer);
+// nextPhaseButton.addEventListener('click', () => {
+//     // stopTimer();
+//     moveToNextPhase();
+// });
+// resetButton.addEventListener('click', reset);
 
 
 
