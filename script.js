@@ -1,5 +1,5 @@
 let heroes = [];
-
+let socket;
 fetch('http://peeranat.ddns.net:3000/api/heroes')
     .then(response => response.json())
     .then(data => {
@@ -8,26 +8,86 @@ fetch('http://peeranat.ddns.net:3000/api/heroes')
     })
     .catch(err => console.error('Error loading heroes:', err));
 
-const socket = io('http://peeranat.ddns.net:3000');
+function connectSocket() {
+    socket = io('http://peeranat.ddns.net:3000', {
+        reconnection: true,
+        reconnectionAttempts: 10, // ลองเชื่อมใหม่สูงสุด 10 ครั้ง
+        reconnectionDelay: 2000,  // ลองใหม่ทุก 2 วินาที
+    });
 
+    socket.on('connect', () => {
+        console.log('✅ Socket connected:', socket.id);
+    });
+
+    socket.on('disconnect', () => {
+        console.warn('⚠️ Socket disconnected.');
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error('❌ Socket connection error:', err.message);
+    });
+
+    socket.on('reconnect_attempt', attempt => {
+        console.log(`🔁 Reconnect attempt #${attempt}`);
+    });
+
+    socket.on('reconnect_failed', () => {
+        console.error('❌ Reconnect failed. You may need to refresh manually.');
+    });
+
+    socket.on('nicknameInit', (nicknames) => {
+    nicknames.forEach(({ position_id, nickname }) => {
+        const input = document.getElementById(`input${position_id}`);
+        const output = document.getElementById(`output${position_id}`);
+        if (input) input.value = nickname;
+        if (output) output.textContent = nickname;
+    });
+});
+}
+connectSocket();
 let timer = null;
 let interval;
 let tournamentId = null;
+let phaseReceived = false;
 
-socket.on('initData', (data) => {
-    document.getElementById('phase').innerText = data.phase.type;
-    document.getElementById('direction').src = data.phase.direction;
-    timer = data.timer;
+window.addEventListener('DOMContentLoaded', () => {
+    loadTournament();
+    socket.on('initData', (data) => {
+        console.log('✅ initData:', data);
+        
+        // Phase
+        document.getElementById('phase').innerText = data.phase?.type || 'Unknown';
 
-    document.getElementById('timer').innerText = timer; // ✅ ให้แสดง timer ที่ได้จาก server
+        // Direction arrow
+        const arrowImg = document.getElementById('arrow');
+        if (arrowImg && data.phase?.direction) {
+            arrowImg.src = data.phase.direction + '?t=' + Date.now(); // บังคับ refresh
+        } else {
+            console.warn('⚠️ No direction or <img id="arrow"> not found');
+        }
 
-    // if (interval) clearInterval(interval);
-    // interval = setInterval(updateTimer, 1000);
+        // Timer
+        document.getElementById('timer').innerText = data.timer;
 
-    displayHeroes(data.heroes);
-    socket.emit('getSelectedHeroes');
-    socket.emit('scoreUpdated');
+        // Load hero list
+        displayHeroes(data.heroes);
+
+        // Load picks & scores
+        socket.emit('getSelectedHeroes');
+        socket.emit('scoreUpdated');
+    });
+    
+
 });
+
+
+// ✅ fallback ถ้า initData ไม่มาใน 2 วิ
+setTimeout(() => {
+    if (!phaseReceived) {
+        console.warn('🟡 initData not received in time. Requesting manually...');
+        socket.emit('requestInit');
+    }
+}, 2000);
 
 // รับอัพเดต timer และ phase จาก server
 socket.on('timerUpdate', ({ timer, currentPhaseIndex }) => {
@@ -41,6 +101,36 @@ socket.on('phaseUpdate', ({ phase, timer: serverTimer, currentPhaseIndex: server
 
     updateUI();
 });
+
+socket.on('nicknameUpdated', ({ positionId, nickname }) => {
+    const input = document.getElementById(`input${positionId}`);
+    const output = document.getElementById(`output${positionId}`);
+    if (input) input.value = nickname;
+    if (output) output.textContent = nickname;
+});
+
+
+function updateOutput() {
+    for (let i = 1; i <= 10; i++) {
+        const input = document.getElementById('input' + i);
+        const output = document.getElementById('output' + i);
+        const nickname = input.value;
+
+        if (output) output.textContent = ` ${nickname}`;
+
+        // เช็กว่า socket พร้อมไหม
+        if (socket && socket.connected) {
+            console.log('📤 Sending nickname:', { positionId: i, nickname });
+
+            socket.emit('updateNickname', {
+                positionId: i,
+                nickname
+            });
+        } else {
+            console.warn('⚠️ Socket not connected when trying to send nickname');
+        }
+    }
+}
 
 
 
@@ -78,7 +168,7 @@ socket.on('timerUpdate', ({ timer }) => {
 
 // สั่ง reset timer + phase
 document.querySelector('button[onclick="reset()"]').addEventListener('click', () => {
-    socket.emit('resetPhase');
+    socket.emit('reset');
 });
 
 // เมื่อ reset ให้เคลียร์ทุกภาพ
@@ -146,13 +236,13 @@ function submitScore() {
 
 
 function loadTournament() {
-    fetch('/api/get-tournament')
+    fetch('http://peeranat.ddns.net:3000/api/get-tournament')
         .then(response => response.json())
         .then(data => {
             document.getElementById('tournamentnamemid').value = data.name;
             document.getElementById('tournamentLogo').innerText = data.name;
-            document.getElementById('blueTeam').innerText = `(${data.blue_score ?? 0})`;
-document.getElementById('redTeam').innerText = `(${data.red_score ?? 0})`;
+            document.getElementById('blueTeam').innerText = `${data.blue_score ?? 0}`;
+document.getElementById('redTeam').innerText = `${data.red_score ?? 0}`;
             document.getElementById('blueScoreInput').value = data.blue_score;
             document.getElementById('redScoreInput').value = data.red_score;
         });
@@ -162,7 +252,7 @@ document.getElementById('redTeam').innerText = `(${data.red_score ?? 0})`;
 function updateTournamentName() {
     const tournamentName = document.getElementById('tournamentnamemid').value;
 
-    fetch('/api/update-tournament-name', {
+    fetch('http://peeranat.ddns.net:3000/api/update-tournament-name', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tournamentName })
@@ -286,14 +376,6 @@ function resetAllDropdowns() {
 }
 
 
- // ฟังก์ชั่นในการอัพเดทเอาท์พุต NICKNAME=
- function updateOutput() {
-    for (let i = 1; i <= 10; i++) {
-        const inputText = document.getElementById('input' + i).value;
-        document.getElementById('output' + i).textContent = ` ${inputText}`;
-    }
-}
-
 // ฟังก์ชั่นรีเซ็ตค่าอินพุตทั้งหมด
 function resetInputs() {
     for (let i = 1; i <= 10; i++) {
@@ -311,6 +393,24 @@ function switchInputs() {
     }
     // อัปเดตเอาท์พุตสวิตช์
     updateOutput();
+}
+function resetScore() {
+    fetch('http://peeranat.ddns.net:3000/api/reset-score', {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Score reset successfully');
+            // โหลดคะแนนใหม่จาก server
+            loadTournament();
+        } else {
+            console.error('❌ Failed to reset score');
+        }
+    })
+    .catch(err => {
+        console.error('❌ Error resetting score:', err);
+    });
 }
 
  // ฟังก์ชั่นสำหรับแลกเปลี่ยนภาพและชื่อทีม
