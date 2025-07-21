@@ -54,7 +54,7 @@
     background-color: aqua;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/Other/ban.png");
+    background-image: url("Assets/Other/ban.webp");
     background-position: center;
     background-size: 100%;
     filter: grayscale(100%);
@@ -65,7 +65,7 @@
     width: 350px;   
     height: 80px;
     background-color:#9900ff;
-    background-image:url("Assets/Other/E-Sport.png");
+    background-image:url("Assets/Other/E-Sport.webp");
     background-size: 105%;
     background-position: center;
     margin-top: 1.3px;
@@ -104,7 +104,7 @@
     width: 350px;
     height: 250px;
     background-color: #9900ff;
-    background-image: url("Assets/Other/Tounamentinfobg.jpg");
+    background-image: url("Assets/Other/Tounamentinfobg.webp");
     background-size: 110%;
     background-position: center;    
     margin-left: 5px;
@@ -251,7 +251,7 @@ button {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/DSLPICKKING.png");
+    background-image: url("Assets/BG/DSLPICKKING.webp");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -263,7 +263,7 @@ button {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/JGPICKKING.png");
+    background-image: url("Assets/BG/JGPICKKING.webp");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -275,7 +275,7 @@ button {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/MIDPICKKING.png");
+    background-image: url("Assets/BG/MIDPICKKING.webp");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -287,7 +287,7 @@ button {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/APLPICKKING.png");
+    background-image: url("Assets/BG/APLPICKKING.webp");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -299,7 +299,7 @@ button {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/SUPPICKING.png");
+    background-image: url("Assets/BG/SUPPICKING.webp");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
