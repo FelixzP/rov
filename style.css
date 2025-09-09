@@ -8,7 +8,8 @@
   /* Menggunakan font di seluruh halaman */
   body {
     font-family: 'bebas neue', sans-serif;
-    background-color: #00ff62;
+    margin: 0px;
+    background-color: #5394d5;
   }
 
 
@@ -16,7 +17,8 @@
 
 .ban {
     display: flex;
-    margin-top:20px
+    margin-top:20px;
+    background: #000000;
 }
 
 .teamnameblue{
@@ -24,7 +26,7 @@
     height: 80px;
     text-align: center;
     line-height: 49px;
-    background-color: #edd7a7;
+    background: rgba(30, 61, 214);
     margin: 1px;
     align-items: center;
     justify-content: center;
@@ -36,7 +38,7 @@
     height: 80px;
     text-align: center;
     line-height: 49px;
-    background-color: #edd7a7;
+    background: rgb(195, 0, 255);
     margin: 1px;
     align-items: center;
     justify-content: center;
@@ -65,7 +67,7 @@
     width: 350px;   
     height: 80px;
     background-color:#9900ff;
-    background-image:url("Assets/Other/E-Sport.webp");
+    background-image:url("Assets/Other/E-Sport.gif");
     background-size: 105%;
     background-position: center;
     margin-top: 1.3px;
@@ -103,8 +105,8 @@
 .tournamentinfo{
     width: 350px;
     height: 250px;
-    background-color: #9900ff;
-    background-image: url("Assets/Other/Tounamentinfobg.webp");
+    background-color: #000000;
+    /* background-image: url("Assets/Other/Tounamentinfobg.webp"); */
     background-size: 110%;
     background-position: center;    
     margin-left: 5px;
@@ -317,14 +319,28 @@ button {
 }
 
 
-.nameholder{
+.nameholderblue{
 
     width: 152.4px ;
     height: 30px ;
     justify-content: center; 
     display: flex;
     align-items: center;
-    background-color: #272727;
+    background: rgb(0, 0, 0);;
+    font-size: 16px;
+    color: #ffffff;
+    margin-right: 1px;
+    margin-left: 1px;
+    margin-top: -30px;
+}
+.nameholderred{
+
+    width: 152.4px ;
+    height: 30px ;
+    justify-content: center; 
+    display: flex;
+    align-items: center;
+    background: rgb(0, 0, 0);
     font-size: 16px;
     color: #ffffff;
     margin-right: 1px;
@@ -345,7 +361,6 @@ button {
     margin-top: 15px;
     margin-right: 10px;
     margin-left: 10px;
-    height: 30px;
 }
 
 .allcontrol{
@@ -387,7 +402,7 @@ button {
 
 .dropdown-container {
     position: relative;
-    width: 100px;
+    width: 120px;
     margin-bottom: 10px;
 }
 
