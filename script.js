@@ -238,10 +238,6 @@ socket.on('timerUpdate', ({ timer }) => {
     document.getElementById('timer').innerText = timer;
 });
 
-// สั่ง reset timer + phase
-document.querySelector('button[onclick="reset()"]').addEventListener('click', () => {
-    socket.emit('reset');
-});
 
 // เมื่อ reset ให้เคลียร์ทุกภาพ
 socket.on('resetSelectedHeroes', () => {
@@ -730,14 +726,23 @@ function updateUI() {
 //     }
 // }
 
+// สั่ง reset timer + phase
+// document.querySelector('button[onclick="reset()"]').addEventListener('click', () => {
+//     socket.emit('reset');
+// });
+
 // Reset the entire process
 function reset() {
-    clearInterval(timerInterval); // Stop the timer
-    // currentPhaseIndex = 0; // Reset phase index
-    // timer = 60; // Reset timer
-    timerRunning = false;
-    // updateUI(); // Reset UI
-    socket.emit('reset');
+    let confirmReset = confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ต?");
+    if (confirmReset) {
+        clearInterval(timerInterval); // Stop the timer
+        timerRunning = false;
+        socket.emit('reset'); // ส่ง event ไปที่ server
+        alert("รีเซ็ตเรียบร้อยแล้ว ✅");
+    } else {
+        // ถ้าไม่อยากให้เด้งแจ้งเตือนตอนกดยกเลิกก็ลบออกได้
+        alert("ยกเลิกการรีเซ็ต ❌");
+    }
 }
 function resetPick() {
     clearInterval(timerInterval); // Stop the timer
