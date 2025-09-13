@@ -8,10 +8,10 @@ fetch('https://peeranat.ddns.net/api/heroes')
     })
     .catch(err => console.error('Error loading heroes:', err));
 
-fetch('https://peeranat.ddns.net/api/getTeamNames')
-    .then(res => res.json())
-    .then(data => {
-        updateTeamNameUI('blue', data.blue);
+ fetch('https://peeranat.ddns.net/api/getTeamNames')
+     .then(res => res.json())
+     .then(data => {
+         updateTeamNameUI('blue', data.blue);
         updateTeamNameUI('red', data.red);
     });
 function connectSocket() {

@@ -5,9 +5,33 @@
     font-style: normal;
   }
 
-  /* Menggunakan font di seluruh halaman */
+@import url('https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@200;300;400;500;600;700&display=swap');
+
+.input-modern {
+            
+            padding: 8.5px;
+            font-size: 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            transition: all 0.3s ease;
+            outline: none;
+            margin-bottom:2px;
+        }
+
+        .input-modern:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .input-modern::placeholder {
+            color: #a0aec0;
+        }
+        
+  /* font body */
   body {
-    font-family: 'bebas neue', sans-serif;
+    font-family: 'Bai Jamjuree', sans-serif;
     margin: 0px;
     background-color: #5394d5;
   }
@@ -96,10 +120,37 @@
 
 .tournamentnamebox{
     width: 200px;
-    height: 30px;
+    height: 60px;
     margin-top: 13px;
     margin-right: 10px;
     margin-left: 10px;
+    
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align:center;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.tournamentnamebox:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.tournamentnamebox:hover {
+    border-color: #94a3b8;
+}
+
+.tournamentnamebox::placeholder {
+    color: #94a3b8;
+    font-style: italic;
 }
 
 .tournamentinfo{
@@ -194,11 +245,11 @@ button {
             font-size: 18px;
             padding: 10px 20px;
             border: none;
-            border-radius: 25px;
+            border-radius: 10px;
             cursor: pointer;
             margin: 10px;
             font-weight: 600;
-            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.4);
+            box-shadow: 0 5px 10px rgba(255, 154, 158, 0.4);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 button:hover {
@@ -294,7 +345,7 @@ button:hover {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/MID1.png");
+    background-image: url("Assets/BG/JG1.png");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -306,7 +357,7 @@ button:hover {
     background-color: blueviolet;
     margin: 1px;
     overflow: hidden;
-    background-image: url("Assets/BG/JG1.png");
+    background-image: url("Assets/BG/MID1.png");
     background-position: center;
     background-size: 110%;
     overflow: hidden;
@@ -587,8 +638,9 @@ button:hover {
     margin-top: 13px;
     align-items: center;
     justify-content: center;
-    color: #000;
-    
+    color: #ffffff;
+     text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+
 }
 .input-container input, .button-container button, .checkbox-container label {
     padding: 8px;
