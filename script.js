@@ -1,6 +1,6 @@
 let heroes = [];
 let socket;
-fetch('https://peeranat.ddns.net/api/heroes')
+fetch('https://peeranat.ddns.net/api/heroes') //เปลื่ยนurl เป็น ip server หรือ ip server ได้
     .then(response => response.json())
     .then(data => {
         heroes = data;
@@ -11,8 +11,8 @@ fetch('https://peeranat.ddns.net/api/heroes')
  fetch('https://peeranat.ddns.net/api/getTeamNames')
      .then(res => res.json())
      .then(data => {
-         updateTeamNameUI('blue', data.blue);
-        updateTeamNameUI('red', data.red);
+        updateTeamName('blue', data.blue);
+        updateTeamName('red', data.red);
     });
 function connectSocket() {
     socket = io('https://peeranat.ddns.net', {
@@ -833,5 +833,6 @@ function swapHeroes(id1, id2) {
             alert('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
         });
 }
+
 
 
